@@ -1,50 +1,31 @@
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Stack;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 public class Game {
+	private Globals gvars = new Globals();
+	
 	private int currentPlayer; // Index of current player
 	private int otherPlayer; // Index of current player
-
+	private int isAI;
+	
 	private TakiCard.Color validColor; // The current valid color
 	private TakiCard.Value validValue; // The current valid value
 
 	private TakiDeck Kupa;
-
+	private TakiCard topCard;
+	
 	private Stack<TakiCard> TrashStack;
-
 	private ArrayList<TakiCard> player1Deck;
 	private ArrayList<TakiCard> player2Deck;
 	private ArrayList<TakiCard> addToPlayer;
-	private TakiCard topCard;
 
-	public Game() {
+
+
+	public Game(int isAI) {
 		start();
+		this.isAI = isAI;
 
-	}
-
-	public TakiCard takeCardsOrder() {
-		TakiCard temp = addToPlayer.get(0);
-		addToPlayer.remove(0);
-		return temp;
-	}
-
-	public int getToAddSize() {
-		return addToPlayer.size();
-	}
-
-	public ArrayList<TakiCard> getDeck(int pid) {
-		if (pid == 1)
-			return player1Deck;
-		return player2Deck;
 	}
 
 	public void start() {
@@ -82,26 +63,32 @@ public class Game {
 
 		// Checks valid first card
 		if (validValue == TakiCard.Value.ChangeColor || validValue == TakiCard.Value.TakeTwo
-				|| validValue == TakiCard.Value.SuperTaki || validValue == TakiCard.Value.Taki) {
+				|| validValue == TakiCard.Value.SuperTaki || validValue == TakiCard.Value.Taki ||
+				validValue == TakiCard.Value.Stop || validValue == TakiCard.Value.ChangeDirection) {
 			start();
-		}
-
-		if (validValue == TakiCard.Value.Stop) {
-			JLabel message = new JLabel(currentPlayer + " Was Stopped!");
-			message.setFont(new Font("Arial", Font.BOLD, 48));
-			JOptionPane.showMessageDialog(null, message);
-		}
-
-		if (lastCard.getValue() == TakiCard.Value.ChangeDirection) {
-			JLabel message = new JLabel("The Game Direction Changed!");
-			message.setFont(new Font("Arial", Font.BOLD, 48));
-			JOptionPane.showMessageDialog(null, message);
 		}
 	}
 
+	public TakiCard takeCardsOrder() {
+		TakiCard temp = addToPlayer.get(0);
+		addToPlayer.remove(0);
+		return temp;
+	}
+
+	public int getToAddSize() {
+		return addToPlayer.size();
+	}
+
+	public ArrayList<TakiCard> getDeck(int pid) {
+		if (pid == 1)
+			return player1Deck;
+		return player2Deck;
+	}
+	
 	public void endTurn() {
 		if (this.currentPlayer == 0)
 			this.currentPlayer = 1;
+
 		else
 			this.currentPlayer = 0;
 	}
@@ -130,12 +117,11 @@ public class Game {
 		// Function returns the Taki Card that is on the top of the stock pile
 		if (!TrashStack.isEmpty())
 			return TrashStack.peek();
-		else
-		{
+		else {
 			TrashStack.push(Kupa.takeCard());
 			return TrashStack.peek();
 		}
-		
+
 	}
 
 	public boolean hasEmptyHand(int pid) {
@@ -217,6 +203,7 @@ public class Game {
 	}
 
 	public int dropCard(int selectedCardIndex) {
+
 		boolean endTurnOnFinish = true;
 		if (selectedCardIndex == -1)
 			return 0;
@@ -245,7 +232,6 @@ public class Game {
 			this.addToTrashStack(this.getDeck(this.getCurrentPlayer()).get(selectedCardIndex));
 			this.getDeck(this.getCurrentPlayer()).remove(selectedCardIndex);
 		}
-
 		if (endTurnOnFinish == true)
 			return 1;
 		else if (endTurnOnFinish == false)
@@ -275,7 +261,7 @@ public class Game {
 		//
 		if (card.getValue() == TakiCard.Value.Stop || card.getValue() == TakiCard.Value.ChangeDirection
 				|| card.getValue() == TakiCard.Value.Plus)
-			endTurnOnFinish = false; // another turn 
+			endTurnOnFinish = false; // another turn
 
 		if (card.getValue() == TakiCard.Value.SuperTaki || card.getValue() == TakiCard.Value.Taki) {
 			// this.removeAllColors();
@@ -326,21 +312,31 @@ public class Game {
 		}
 
 		else if (card.getColor() == TakiCard.Color.ChangeColor) {
-
-			String[] options = { "Red", "Blue", "Green", "Yellow" };
-			try {
-				Object searchType = JOptionPane.showInputDialog(null, null, "Choose a color ",
-						JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-				this.validColor = getColorByString(searchType.toString());
-			} catch (NullPointerException e) {
-				return false;
+			{
+				if (getCurrentPlayer() == 1 && isAI == 1)
+				{
+					this.validColor = gvars.getAIchosenColor();
+					this.validValue = null;
+					System.out.println("valid " + validColor);
+				}
+				else
+				{
+				String[] options = { "Red", "Blue", "Green", "Yellow" };
+				try {
+					Object searchType = JOptionPane.showInputDialog(null, null, "Choose a color ",
+							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+					this.validColor = getColorByString(searchType.toString());
+				} catch (NullPointerException e) {
+					return false;
+				}
+				this.validValue = null;
+				System.out.println("valid " + validColor);
+				}
 			}
-			this.validValue = null;
-			System.out.println("valid " + validColor);
-
 			return true;
 		}
 
 		return false;
 	}
+
 }

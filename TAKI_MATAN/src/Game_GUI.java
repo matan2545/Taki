@@ -1,10 +1,11 @@
 import java.awt.EventQueue;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -13,31 +14,42 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.FlowLayout;
-import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.SystemColor;
+import javax.swing.JCheckBox;
 
 public class Game_GUI {
+	private AI_Player ai;
+	private Globals gvars = new Globals();
+
 	private Color bgColor = new Color(60, 60, 60); // The background color of the game frame
+	private Color darkerBgColor = new Color(43, 43, 43); // The background color of the game frame
+	
 	private int selectedCardIndex = -1; // The index of the selected buttons (the selected card)
 	private boolean isTaki = false; // Indicates if a Taki move has started
 	private boolean isTakeTwo = false; // Indicates if a Take-Two move has started
-
+	private boolean showCards = false;
+	private static int isAI;
+	
 	private JFrame frmTaki; // The frame of the game
 	private JPanel playerPanel; // The panel of player number one
 	private JPanel oppPanel; // The panel of player number two
 	private JButton LastCardButton; // Last card dropped button
 	private JButton EndTaki; // A button to end a Taki move, appears only when isTaki is true.
+	private JCheckBox showOppCards;
+	private JLabel player1Turn;
+	private JLabel player2Turn;
 
+	
 	private ArrayList<JButton> buttonsList1; // The ArrayList of buttons(card) of player number one
 	private ArrayList<JButton> buttonsList2; // The ArrayList of buttons(card) of player number two
 
-	private Game game; // The game class
+	public Game game; // The game class
 
 	// Function gets a type that indicated if the game is 1v1(0) or 1vPC(1)
 	// The Function Launch the application.
 	public static void main(String[] args, int type) {
+		isAI = type;
+		System.out.println("IS AI: ???" + isAI);
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -56,7 +68,8 @@ public class Game_GUI {
 		buttonsList2 = new ArrayList<JButton>();
 		playerPanel = new JPanel();
 
-		game = new Game();
+		game = new Game(isAI);
+		
 
 		initialize();
 
@@ -90,12 +103,17 @@ public class Game_GUI {
 			public void actionPerformed(ActionEvent e) {
 				// Disable Taki action when pressed, and hiding the button
 				isTaki = false; // End Taki action
+
 				EndTaki.setVisible(false); // hide End Taki button
 				int endTurnOnFinish = game.dropCardByCard(game.getLastCardStack());
-
+				//game.endTurn();
+				showPlayerTurn();
 				ChecksEndCondition(endTurnOnFinish); // Checks end turn conditions
 
 				selectedCardIndex = -1; // Resets selected card index
+				if (game.getCurrentPlayer() == 1 && isAI == 1) {
+					getAIindex();
+				}
 
 			}
 		});
@@ -103,9 +121,45 @@ public class Game_GUI {
 		// End Taki button define
 		EndTaki.setBounds(1052, 306, 191, 77);
 		EndTaki.setVisible(false);
+		
+		player2Turn = new JLabel("Your Turn");
+		player2Turn.setForeground(Color.WHITE);
+		player2Turn.setBounds(29, 198, 68, 14);
+		player2Turn.setVisible(false);
+		frmTaki.getContentPane().add(player2Turn);
+		
+		player1Turn = new JLabel("Your Turn");
+		player1Turn.setForeground(Color.WHITE);
+		player1Turn.setBounds(29, 471, 68, 14);
+		frmTaki.getContentPane().add(player1Turn);
+		
+		showOppCards = new JCheckBox("Show cards");
+		showOppCards.setForeground(Color.WHITE);
+		showOppCards.setBackground(darkerBgColor);
+		showOppCards.setBounds(29, 223, 129, 23);
+		frmTaki.getContentPane().add(showOppCards);
 		frmTaki.getContentPane().add(EndTaki);
-		LastCardButton.setBounds(625, 272, 108, 154);
+		LastCardButton.setBounds(625, 272, 158, 154);
 		frmTaki.getContentPane().add(LastCardButton);
+		showOppCards.addItemListener(new ItemListener() {
+		   public void itemStateChanged(ItemEvent ev) {
+		      if(ev.getStateChange()==ItemEvent.SELECTED){
+		        System.out.println("button is selected");
+		        showCards = true;
+		        printDeck(game.getDeck(1), buttonsList2);
+		      } else if(ev.getStateChange()==ItemEvent.DESELECTED){
+		        System.out.println("button is not selected");
+		        showCards = false;
+		        printDeck(game.getDeck(1), buttonsList2);
+		      }
+		   }
+		});
+		
+		if (isAI == 0)
+		{
+			showCards = true;
+			showOppCards.setVisible(false);
+		}
 
 		// Deck button define
 		JButton KupaButton = new JButton("");
@@ -143,6 +197,19 @@ public class Game_GUI {
 		lblNewLabel.setBounds(-10, 0, 1274, 681);
 		frmTaki.getContentPane().add(lblNewLabel);
 	}
+	private void showPlayerTurn()
+	{
+		if (game.getCurrentPlayer() == 1)
+		{
+			player1Turn.setVisible(false);
+			player2Turn.setVisible(true);
+		}
+		else
+		{
+		player1Turn.setVisible(true);
+		player2Turn.setVisible(false);
+		}
+	}
 
 	private JPanel getCurrentPlayerPanel() {
 		// Function returns current player's panel
@@ -174,8 +241,20 @@ public class Game_GUI {
 	private void printDeck(ArrayList<TakiCard> deck, ArrayList<JButton> btList) {
 		// Function gets a deck and an ArrayList of buttons
 		// Function adds icons to the buttons by the deck
+		if (btList == buttonsList2 && showCards == false)
+		{
+			ImageIcon cardImg = new ImageIcon("Photos\\\\Cards\\\\Back.png");
+			Image image = cardImg.getImage();
+			Image newimg = image.getScaledInstance(145, 160, java.awt.Image.SCALE_SMOOTH);
+			cardImg = new ImageIcon(newimg);
+			for (int i = 0; i < deck.size(); i++)
+				btList.get(i).setIcon(cardImg);
+		}
+		else
+		{
 		for (int i = 0; i < deck.size(); i++)
 			btList.get(i).setIcon(getCardImage(deck.get(i)));
+		}
 	}
 
 	private void addButtons(ArrayList<JButton> btList, JPanel my_panel, int n) {
@@ -191,6 +270,7 @@ public class Game_GUI {
 						int j = btList.indexOf(event.getSource());
 						System.out.println("button " + j);
 						selectedCardIndex = j; // Update button's selected index
+
 					}
 
 				}
@@ -219,11 +299,18 @@ public class Game_GUI {
 			game.getDeck(game.getCurrentPlayer()).add(takenCard);
 		}
 		updateScreen(); // Updates player's buttons
-		game.endTurn(); // End current player's turn
+		game.endTurn(); // End current player's turn	
+		
+		showPlayerTurn();
+		/// AI
+		if (game.getCurrentPlayer() == 1 && isAI == 1) {
+			getAIindex();
 
+		}
 	}
 
 	private void updateScreen() {
+
 		// Function update current players button list
 		getCurrentPlayerButtonList().clear(); /// Clear player's button list
 		getCurrentPlayerPanel().removeAll(); // Clears player's panel
@@ -250,26 +337,27 @@ public class Game_GUI {
 			JOptionPane.showMessageDialog(frmTaki, "Player 2 Won !");
 			frmTaki.dispose();
 		}
+		System.out.println("*** UPDATED SCREEN ***");
 	}
 
 	private void takeLastCard() {
+
 		// Function drops selected card if possible
 		if (selectedCardIndex != -1) // Checks if the player chose a card
 			if (isTakeTwo == true) // Checks if Take 2 action is enabled
 				if (game.take2Series(selectedCardIndex) == true) {
 					updateScreen(); // Updates player's buttons
 					game.finishTurn(true);
+					showPlayerTurn();
+					if (game.getCurrentPlayer() == 1 && isAI == 1) {
+						getAIindex();
+					}
 					return;
 				} else
 					return;
 
 		if (selectedCardIndex != -1 && isTaki == true) // Checks if Taki action is enabled
 			if (game.getDeck(game.getCurrentPlayer()).get(selectedCardIndex).getColor() != game.getValidColor()) // Not
-																													// a
-																													// regular
-																													// taki
-																													// type
-
 				if (game.getDeck(game.getCurrentPlayer()).get(selectedCardIndex)
 						.getColor() == TakiCard.Color.ChangeColor // Stops a Taki process by change color
 						|| game.getDeck(game.getCurrentPlayer()).get(selectedCardIndex).getValue() == game
@@ -291,6 +379,39 @@ public class Game_GUI {
 		ChecksEndCondition(endTurnOnFinish); // Checks end turn conditions
 
 		selectedCardIndex = -1; // Resets selected index
+
+		if (game.getCurrentPlayer() == 1 && isAI == 1) {
+			getAIindex();
+		}
+
+	}
+
+	public void getAIindex() {
+		ai = new AI_Player(game.getDeck(game.getCurrentPlayer()), game.getValidValue(), game.getValidColor(), isTakeTwo,
+				isTaki);
+		try {
+			System.out.println("best index: " + ai.ChooseBestIndex() + "=" + game.getDeck(1).get(ai.ChooseBestIndex()));
+		} catch (IndexOutOfBoundsException e) {
+
+		}
+		if (ai.getBestColor() != null) {
+			System.out.println("best color: " + ai.getBestColor());
+			gvars.setAIchosenColor(ai.getBestColor());
+		}
+		if (ai.ChooseBestIndex() == -1)
+			takeFromKupa();
+		else if (ai.ChooseBestIndex() == -2) {
+			isTaki = false; // End Taki action
+			EndTaki.setVisible(false); // hide End Taki button
+			int endTurnOnFinish = game.dropCardByCard(game.getLastCardStack());
+
+			ChecksEndCondition(endTurnOnFinish); // Checks end turn conditions
+
+			selectedCardIndex = -1; // Resets selected card index
+		} else {
+			selectedCardIndex = ai.ChooseBestIndex();
+			takeLastCard();
+		}
 	}
 
 	private void ChecksEndCondition(int endTurnOnFinish) {
@@ -312,6 +433,7 @@ public class Game_GUI {
 			isTakeTwo = true; // Starts Take 2 action
 			game.finishTurn(true); // Ends current player's turn
 		}
+		showPlayerTurn();
 
 	}
 
@@ -329,7 +451,7 @@ public class Game_GUI {
 		// Function gets a Taki Card
 		// Function displays the card on top card button
 		LastCardButton.setIcon(getCardImage(card)); // Updates top card's icon
-
+		
 		// Creates buttons's stroke by the current valid color
 		if (game.getValidColor() == TakiCard.Color.Red)
 			LastCardButton.setBorder(BorderFactory.createLineBorder(Color.red, 5));
@@ -341,5 +463,6 @@ public class Game_GUI {
 			LastCardButton.setBorder(BorderFactory.createLineBorder(Color.blue, 5));
 		else
 			LastCardButton.setBorder(BorderFactory.createLineBorder(Color.gray, 5));
+		System.out.println("*** PRINTED TOP CARD ***");
 	}
 }
