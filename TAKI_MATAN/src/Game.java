@@ -12,24 +12,26 @@ public class Game {
 	private TakiCard.Color validColor; // The current valid color
 	private TakiCard.Value validValue; // The current valid value
 
-	private TakiDeck Kupa;
-	private TakiCard topCard;
+	private TakiDeck Kupa; // The deck of the game
+	private TakiCard topCard; // The top card
 	
-	private Stack<TakiCard> TrashStack;
-	private ArrayList<TakiCard> player1Deck;
-	private ArrayList<TakiCard> player2Deck;
-	private ArrayList<TakiCard> addToPlayer;
+	private Stack<TakiCard> TrashStack; // Dropped cards
+	private ArrayList<TakiCard> player1Deck; // Player1 Deck
+	private ArrayList<TakiCard> player2Deck; // Player2 Deck
+	private ArrayList<TakiCard> addToPlayer; // Temp ArrayList for TakeTwo situation
 
 
 
 	public Game(int isAI) {
+		// Function gets an int
+		// Function starts the game and define if its gamemode
 		start();
 		this.isAI = isAI;
 
 	}
 
 	public void start() {
-
+		// Function initialize the game
 		Kupa = new TakiDeck();
 		TrashStack = new Stack<TakiCard>();
 		addToPlayer = new ArrayList<TakiCard>();
@@ -70,22 +72,27 @@ public class Game {
 	}
 
 	public TakiCard takeCardsOrder() {
+		// Funtion returns the TakiCard to add
 		TakiCard temp = addToPlayer.get(0);
 		addToPlayer.remove(0);
 		return temp;
 	}
 
 	public int getToAddSize() {
+		// Function returns the size of TakeTwo action
 		return addToPlayer.size();
 	}
 
 	public ArrayList<TakiCard> getDeck(int pid) {
+		// Function gets player's ID 
+		// Function returns player's deck
 		if (pid == 1)
 			return player1Deck;
 		return player2Deck;
 	}
 	
 	public void endTurn() {
+		// Function end current player's turn 
 		if (this.currentPlayer == 0)
 			this.currentPlayer = 1;
 
@@ -94,6 +101,8 @@ public class Game {
 	}
 
 	public void addToTrashStack(TakiCard card) {
+		// Function gets a card
+		// Function add the card to the dropped cards stack
 		TrashStack.push(card);
 		if (card.getColor() != TakiCard.Color.ChangeColor) {
 			validColor = card.getColor();
@@ -102,14 +111,17 @@ public class Game {
 	}
 
 	public TakiCard TakeACard() {
+		// Function returns a card from the deck
 		return Kupa.takeCard();
 	}
 
 	public int getKupaSize() {
+		// Function returns the size of the main deck
 		return Kupa.getSize();
 	}
 
 	public int getThrashStackSize() {
+		// Function returns the size of the Stack
 		return TrashStack.size();
 	}
 
@@ -157,22 +169,30 @@ public class Game {
 	 */
 
 	public TakiCard.Color getValidColor() {
+		// Function returns the valid color
 		return this.validColor;
 	}
 
 	public TakiCard.Value getValidValue() {
+		// Function returns the valid value
 		return this.validValue;
 	}
 
 	public boolean validCardPlay(TakiCard card) {
+		// Function gets a card
+		// Function returns true or false if the card is valid
 		return card.getColor() == getValidColor() || card.getValue() == getValidValue();
 	}
 
 	public void setCardColor(TakiCard.Color color) {
+		// Function gets a color
+		// Function sets the new valid color
 		validColor = color;
 	}
 
 	public boolean validTakiDrop(int index) {
+		// Function gets a card index
+		// Function returns true or false if the card is valid to drop, and removes it
 		if (this.getDeck(this.getCurrentPlayer()).get(index).getColor() == this.getValidColor()) {
 			this.getDeck(this.getCurrentPlayer()).remove(index);
 			return true;
@@ -181,6 +201,8 @@ public class Game {
 	}
 
 	public boolean take2Series(int index) {
+		// Function gets a card index
+		// Function starts a TakeTwo action and returns true or false if started
 		if (index != -1 && this.getDeck(this.getCurrentPlayer()).get(index).getValue() == TakiCard.Value.TakeTwo) {
 			this.addToTrashStack(this.getDeck(this.getCurrentPlayer()).get(index));
 			this.getDeck(this.getCurrentPlayer()).remove(index);
@@ -191,8 +213,10 @@ public class Game {
 		}
 		return false;
 	}
-
+	
 	public boolean take2SeriesByCard(TakiCard card) {
+		// Function gets a card
+		// Function adds cards to the temp ArrayList
 		if (card.getValue() == TakiCard.Value.TakeTwo) {
 			addToPlayer.add(Kupa.takeCard());
 			addToPlayer.add(Kupa.takeCard());
@@ -203,7 +227,8 @@ public class Game {
 	}
 
 	public int dropCard(int selectedCardIndex) {
-
+		// Function gets a card index
+		// Function checks the rules and returns an answer for the situation
 		boolean endTurnOnFinish = true;
 		if (selectedCardIndex == -1)
 			return 0;
@@ -241,6 +266,7 @@ public class Game {
 	}
 
 	public void checkIfEmptyKupa() {
+		// Function checks if the main deck is empty, if its empty the function will refill it
 		if (this.Kupa.isEmpty()) {
 			Kupa.recharge(TrashStack);
 			TrashStack.clear();
@@ -248,6 +274,8 @@ public class Game {
 	}
 
 	public int dropCardByCard(TakiCard card) {
+		// Function gets a card
+		// Function checks the rules and returns an answer for the situation
 		boolean endTurnOnFinish = true;
 
 		if (this.submitPlayerCard(card) == false) {
@@ -276,11 +304,15 @@ public class Game {
 	}
 
 	public void finishTurn(boolean endTurnOnFinish) {
+		// Function gets a boolean
+		// Function ends the turn if the boolean is true
 		if (endTurnOnFinish == true)
 			this.endTurn();
 	}
 
 	public TakiCard.Color getColorByString(String color) {
+		// Function gets a string
+		// Function returns the Color defined by the string
 		if (color.equals("Red"))
 			return TakiCard.Color.Red;
 		else if (color.equals("Blue"))
@@ -291,6 +323,8 @@ public class Game {
 	}
 
 	public void startTaki(int index) {
+		// Function gets an inde
+		// Function starts a taki action
 		if (index == -1)
 			return;
 		if (this.getDeck(this.getCurrentPlayer()).get(index).getColor() == this.getValidColor()) {
@@ -301,6 +335,8 @@ public class Game {
 	}
 
 	public boolean submitPlayerCard(TakiCard card) {
+		// Function gets a card
+		// Function returns true or false if the card is valid and open color select window if necessary
 		if (validCardPlay(card)) {
 			validColor = card.getColor();
 			validValue = card.getValue();

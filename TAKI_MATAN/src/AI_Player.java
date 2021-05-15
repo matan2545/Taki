@@ -74,28 +74,8 @@ public class AI_Player {
 
 	}
 
-	public int findBestRegCardOption() {
-		int regIndex = -1;
-		for (int i = 0; i < myDeck.size(); i++) {
-			if (myDeck.get(i).getValue() == TakiCard.Value.TakeTwo && myDeck.get(i).getColor() == validColor) {
-				bestIndex = 35;
-				return i; // 25 points
-			}
-			if ((myDeck.get(i).getValue() == TakiCard.Value.Stop
-					|| myDeck.get(i).getValue() == TakiCard.Value.ChangeDirection
-					|| myDeck.get(i).getValue() == TakiCard.Value.Plus) && myDeck.get(i).getColor() == validColor) {
-				bestIndex = 32;
-				return i; // 15
-			}
-
-			if (myDeck.get(i).getColor() == validColor)
-				bestIndex = i;
-			regIndex = i;
-		}
-		return regIndex;
-	}
-
 	public int findNotSameColorButSameValueIndex() {
+		// Function returns the index of the same value card
 		int maxInThisColor = 0;
 		int returnIndex = -1;
 		for (int i = 0; i < myDeck.size(); i++) {
@@ -110,6 +90,7 @@ public class AI_Player {
 	}
 
 	public int moreTurnCardIndexSameColor() {
+		// Function returns the index of a Stop/ChangeDirection/Plus card
 		for (int i = 0; i < myDeck.size(); i++) {
 			if ((myDeck.get(i).getValue() == TakiCard.Value.Stop
 					|| myDeck.get(i).getValue() == TakiCard.Value.ChangeDirection
@@ -122,6 +103,7 @@ public class AI_Player {
 	}
 
 	public int TakiIndexSameColor() {
+		// Function returns the index of Taki card
 		for (int i = 0; i < myDeck.size(); i++) {
 			if (myDeck.get(i).getValue() == TakiCard.Value.Taki && myDeck.get(i).getColor() == validColor) {
 				return i;
@@ -132,6 +114,7 @@ public class AI_Player {
 	}
 
 	public int getTake2IndexSameColor() {
+		// Function returns the index of TakeTwo card
 		for (int i = 0; i < myDeck.size(); i++) {
 			if (myDeck.get(i).getValue() == TakiCard.Value.TakeTwo && myDeck.get(i).getColor() == validColor) {
 				return i;
@@ -142,6 +125,7 @@ public class AI_Player {
 	}
 
 	public int getRegValidCardIndexSameColor() {
+		// Function returns same color card index
 		for (int i = 0; i < myDeck.size(); i++) {
 			if (myDeck.get(i).getColor() == validColor)
 				return i;
@@ -150,6 +134,7 @@ public class AI_Player {
 	}
 
 	public int findTake2Index() {
+		// Function returns TakeTwo card index
 		for (int i = 0; i < myDeck.size(); i++) {
 			if (myDeck.get(i).getValue() == validValue)
 				return i;
@@ -159,11 +144,10 @@ public class AI_Player {
 	}
 
 	public int ChooseBestIndex() {
-
+		// Function returns the best index for the player
 		//// update my deck
 		score = 0;
 		bestColor = null;
-		//
 
 		int sumValidColors = howMuchByColor(validColor);
 		// MORE THAN 1 VALID CARD BY COLOR
@@ -242,6 +226,7 @@ public class AI_Player {
 	}
 
 	public TakiCard.Color getBestColor() {
+		// Function returns the chosen color
 		return this.bestColor;
 	}
 

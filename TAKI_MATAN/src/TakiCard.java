@@ -25,19 +25,23 @@ public class TakiCard {
 	private final Value value;
 
 	public TakiCard(final Color color, final Value value) {
+		// Builder
 		this.color = color;
 		this.value = value;
 	}
 
 	public Color getColor() {
+		// Function returns the card color
 		return this.color;
 	}
 
 	public Value getValue() {
+		// Function returns the card value
 		return this.value;
 	}
 
 	public String toString() {
+		// Function prints the card
 		return color + "_" + value;
 	}
 }
