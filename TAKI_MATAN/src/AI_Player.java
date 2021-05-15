@@ -1,19 +1,20 @@
 import java.util.ArrayList;
 
 public class AI_Player {
-	private int bestIndex;
-	private int score;
-	private boolean isTake2;
-	boolean isTaki;
+	private int bestIndex; // The chosen index
+	private int score; // The score for the AI
+	private boolean isTake2; // If take2 is on
+	boolean isTaki; // If taki is on
 	
-	private ArrayList<TakiCard> myDeck;
-	private TakiCard.Color validColor;
-	private TakiCard.Value validValue;
-	private TakiCard.Color bestColor;
+	private ArrayList<TakiCard> myDeck; // AI's deck
+	private TakiCard.Color validColor; // Valid color
+	private TakiCard.Value validValue; // Valid value
+	private TakiCard.Color bestColor; // The chosen color (for SuperTaki / ChangeColor)
 
 
 	public AI_Player(ArrayList<TakiCard> deck, TakiCard.Value validValue, TakiCard.Color validColor, boolean isTake2,
 			boolean isTaki) {
+		// Builder
 		this.myDeck = deck;
 		this.validColor = validColor;
 		this.validValue = validValue;
@@ -22,6 +23,8 @@ public class AI_Player {
 	}
 
 	public int howMuchByColor(TakiCard.Color color) {
+		// Function gets a color
+		// Function returns how much cards from this color
 		int sumSameColor = 0;
 		for (int i = 0; i < myDeck.size(); i++) {
 			if (myDeck.get(i).getColor() == color)
@@ -31,6 +34,7 @@ public class AI_Player {
 	}
 
 	public TakiCard.Color findMaxColorInDeck() {
+		// Function returns how much cards from this color
 		int maxSum = howMuchByColor(TakiCard.Color.Red);
 		TakiCard.Color maxColor = TakiCard.Color.Red;
 
@@ -47,6 +51,8 @@ public class AI_Player {
 	}
 
 	public int findCardindex(TakiCard.Value value) {
+		// Function gets a value
+		// Function a card with the same value or -1
 		for (int i = 0; i < myDeck.size(); i++) {
 			if (myDeck.get(i).getValue() == value)
 				return i;
@@ -55,6 +61,8 @@ public class AI_Player {
 	}
 
 	public boolean isOnlyOneColorLeft(TakiCard.Color colorToCheck) {
+		// Function gets a color
+		// Function returns true or false if there is only one card left in this color
 		int sum = 0;
 		for (int i = 0; i < myDeck.size(); i++) {
 			if (myDeck.get(i).getColor() == colorToCheck)

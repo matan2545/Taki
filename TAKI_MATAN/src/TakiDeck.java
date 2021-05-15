@@ -19,6 +19,7 @@ public class TakiDeck {
 	}
 
 	public void reset() {
+		// Function reset the deck
 		TakiCard.Color[] colors = TakiCard.Color.values();
 
 		for (int i = 0; i < colors.length - 1; i++) {
@@ -51,28 +52,32 @@ public class TakiDeck {
 
 	public void recharge(Stack<TakiCard> stk)
 	{
+		// Function refill the deck
 		while (!stk.isEmpty())
 		{
 			cards.add(stk.pop());
 		}
 	}
 	public boolean isEmpty() {
+		// Function returns true or false if the deck is empty
 		return cards.size() == 0;
 	}
 
 	public void shuffle() {
-
+		// Function shuffles the deck
 		for (int i = 0; i < 4; i++)
 			Collections.shuffle(cards);
 
 	}
 
 	public int getSize() {
+		// Function returns the size of the deck
 		return this.cards.size();
 	}
 	
 	public void printCards()
 	{
+		// Function prints the cards
 		for (int i = 0; i< this.getSize(); i++)
 		{
 			System.out.println(this.cards.get(i));
@@ -80,6 +85,7 @@ public class TakiDeck {
 	}
 
 	public TakiCard takeCard() throws IllegalArgumentException {
+		// Function returns a card from the deck
 		if (isEmpty())
 			throw new IllegalArgumentException("Cannot take a card, deck is empty");
 		TakiCard temp = cards.get(cards.size() - 1);
@@ -89,6 +95,7 @@ public class TakiDeck {
 
 	public ArrayList<TakiCard> takeCard(int n) // take multiple cards
 	{
+		// Function returns several cards from the deck
 		ArrayList<TakiCard> ret = new ArrayList<TakiCard>();
 		for (int i = 0; i < n; i++) {
 			ret.add(cards.get(cards.size() - 1));
